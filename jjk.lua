@@ -189,7 +189,7 @@ local function SetTabletESPMode(active)
 end
 
 HomeTab:CreateButton({
-    Name = "Mischievous Tablet Chest [ HOTEL 0 ]",
+    Name = "Mischievous Tablet [Chest]",
     Callback = function()
 
         function giveTablet()
@@ -384,7 +384,7 @@ HomeTab:CreateButton({
         
         
         ScannerCamera.Parent = ScannerViewportFrame
-        ScannerCamera.FieldOfView = 50
+        ScannerCamera.FieldOfView = 67
         
         ScannerViewportFrame.ViewNormal.CurrentCamera = ScannerCamera
         ScannerViewportFrame.ViewSpecial.CurrentCamera = ScannerCamera
@@ -849,7 +849,6 @@ UI.Parent = Plr.PlayerGui
 Scanner.Parent = Plr.Backpack
     end,
 })
-
 
 HomeTab:CreateButton({
     Name = "Buff Figure [ SEEK ]",
@@ -2196,7 +2195,7 @@ ChamsTab:CreateSlider({
 
 local ESP_RED = Color3.fromRGB(255, 45, 45)
 local ESP_YELLOW = Color3.fromRGB(255, 230, 0)
-local ESP_GREEN = Color3.fromRGB(0, 250, 10)
+local ESP_GREEN = Color3.fromRGB(32, 152, 104)
 
 local LatestRoomValue = game:GetService("ReplicatedStorage"):WaitForChild("GameData"):WaitForChild("LatestRoom")
 
@@ -2276,7 +2275,7 @@ local function AddHighlight(target, name, color, fillTransparency)
     box.Size = boxSize
     box.CFrame = boxCFrame
     box.Color3 = color or Color3.new(1, 1, 1)
-    box.Transparency = 0.15
+    box.Transparency = 0.7
     box.AlwaysOnTop = not TabletViewActive
     box.ZIndex = 10
     box.Parent = adornee
