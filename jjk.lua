@@ -189,7 +189,7 @@ local function SetTabletESPMode(active)
 end
 
 HomeTab:CreateButton({
-    Name = "Mischievous Tablet [Chest]",
+    Name = "Mischievous Tablet Chest [ HOTEL 0 ]",
     Callback = function()
 
         function giveTablet()
@@ -384,7 +384,7 @@ HomeTab:CreateButton({
         
         
         ScannerCamera.Parent = ScannerViewportFrame
-        ScannerCamera.FieldOfView = 67
+        ScannerCamera.FieldOfView = 50
         
         ScannerViewportFrame.ViewNormal.CurrentCamera = ScannerCamera
         ScannerViewportFrame.ViewSpecial.CurrentCamera = ScannerCamera
@@ -1590,10 +1590,7 @@ ExploitsTab:CreateToggle({
 
 local DisableRansomEnabled = false
 local RansomHookInstalled = false
-local RansomOldNamecall
-
 local RansomModuleHookInstalled = false
-local RansomOriginalEntry
 
 local function FindRansomInfect()
     local player = game:GetService("Players").LocalPlayer
@@ -1628,22 +1625,14 @@ local function InstallRansomModuleHook()
     local ok, entry = pcall(require, module)
     if not ok or type(entry) ~= "function" then return false end
 
-    RansomOriginalEntry = entry
     local original
-    original = hookfunction(entry, function(p77, p78, p79, p80)
+    original = hookfunction(entry, function(...)
+        -- Block the Ransom client routine at its entry point. This prevents its
+        -- infection sequence before its own animation/sound/UI code can run.
         if LightningHaxAlive and DisableRansomEnabled then
-            if p79 == nil and p80 == nil and p78 then
-                local remote = p78:FindFirstChild("RansomAttack")
-                if remote and remote:IsA("RemoteEvent") then
-                    pcall(function()
-                        remote:FireServer("didnt")
-                    end)
-                end
-            end
             return
         end
-
-        return original(p77, p78, p79, p80)
+        return original(...)
     end)
 
     RansomModuleHookInstalled = true
@@ -1656,9 +1645,12 @@ local function InstallRansomHook()
 
     local old
     old = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-        local args = {...}
         local method = getnamecallmethod()
+        local args = {...}
 
+        -- Keep the confirmed server-side proc prevention, but do not hook
+        -- generic Play/TweenService calls: those can interfere with camera,
+        -- mouse and Rayfield itself.
         if LightningHaxAlive
             and DisableRansomEnabled
             and method == "FireServer"
@@ -1673,7 +1665,6 @@ local function InstallRansomHook()
         return old(self, ...)
     end))
 
-    RansomOldNamecall = old
     RansomHookInstalled = true
     return true
 end
@@ -1686,19 +1677,11 @@ ExploitsTab:CreateToggle({
         DisableRansomEnabled = Value
 
         if Value then
-            -- This is the previously confirmed working proc-block path.
+            -- Install only the Ransom-specific hooks. No global animation,
+            -- sound, tween, camera or input interception is performed.
             pcall(InstallRansomModuleHook)
             pcall(InstallRansomHook)
         end
-    end
-})
-
-ExploitsTab:CreateToggle({
-    Name = "Disable Eyes",
-    CurrentValue = false,
-    Flag = "DisableEyes",
-    Callback = function(Value)
-        DisableEyesEnabled=Value
     end
 })
 
@@ -2195,7 +2178,7 @@ ChamsTab:CreateSlider({
 
 local ESP_RED = Color3.fromRGB(255, 45, 45)
 local ESP_YELLOW = Color3.fromRGB(255, 230, 0)
-local ESP_GREEN = Color3.fromRGB(32, 152, 104)
+local ESP_GREEN = Color3.fromRGB(0, 250, 10)
 
 local LatestRoomValue = game:GetService("ReplicatedStorage"):WaitForChild("GameData"):WaitForChild("LatestRoom")
 
@@ -2226,81 +2209,17 @@ local function IsObjectInESPRange(obj)
 end
 
 local function AddHighlight(target, name, color, fillTransparency)
-    if not target or not target.Parent then return end
-
-    local existing = target:FindFirstChild(name)
-    if existing then
-        existing:Destroy()
-    end
-
-    local adornee
-    local boxSize
-    local boxCFrame
-
-    if target:IsA("BasePart") then
-        adornee = target
-        boxSize = target.Size
-        boxCFrame = CFrame.identity
-
-    elseif target:IsA("Model") then
-        local success, cf, size = pcall(function()
-            return target:GetBoundingBox()
-        end)
-
-        if not success then
-            return
-        end
-
-        adornee = Instance.new("Part")
-        adornee.Name = name
-        adornee.Anchored = true
-        adornee.CanCollide = false
-        adornee.CanTouch = false
-        adornee.CanQuery = false
-        adornee.Transparency = 1
-        adornee.Size = Vector3.new(0.1, 0.1, 0.1)
-        adornee.CFrame = cf
-        adornee.Parent = target
-
-        boxSize = size
-        boxCFrame = CFrame.identity
-
-    else
-        return
-    end
-
-    local box = Instance.new("BoxHandleAdornment")
-    box.Name = name
-    box.Adornee = adornee
-    box.Size = boxSize
-    box.CFrame = boxCFrame
-    box.Color3 = color or Color3.new(1, 1, 1)
-    box.Transparency = 0.7
-    box.AlwaysOnTop = not TabletViewActive
-    box.ZIndex = 10
-    box.Parent = adornee
-
-    if target:IsA("Model") then
-        local connection
-
-        connection = game:GetService("RunService").RenderStepped:Connect(function()
-            if not target.Parent or not adornee.Parent or not box.Parent then
-                connection:Disconnect()
-                return
-            end
-
-            local ok, newCF, newSize = pcall(function()
-                return target:GetBoundingBox()
-            end)
-
-            if ok then
-                adornee.CFrame = newCF
-                box.Size = newSize
-            end
-        end)
-    end
-
-    return box
+    if not target or not target.Parent or target:FindFirstChild(name) then return end
+    local h = Instance.new("Highlight")
+    h.Name = name
+    h.Adornee = target
+    h.FillColor = color
+    h.OutlineColor = color
+    h.FillTransparency = fillTransparency or 0.75
+    h.OutlineTransparency = 0
+    h.DepthMode = TabletViewActive and Enum.HighlightDepthMode.Occluded or Enum.HighlightDepthMode.AlwaysOnTop
+    h.Parent = target
+    return h
 end
 
 local function RemoveNamedESP(...)
