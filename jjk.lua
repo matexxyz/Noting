@@ -188,8 +188,10 @@ local function SetTabletESPMode(active)
     end
 end
 
+Home:CreateSection("Exclusive Items")
+
 HomeTab:CreateButton({
-    Name = "Mischievous Tablet Chest [ HOTEL 0 ]",
+    Name = "Red Tablet [ CHEST ]",
     Callback = function()
 
         function giveTablet()
@@ -850,6 +852,8 @@ Scanner.Parent = Plr.Backpack
     end,
 })
 
+Home:CreateSection("Exclusive Addons")
+
 HomeTab:CreateButton({
     Name = "Buff Figure [ SEEK ]",
     Callback = function()
@@ -1000,6 +1004,713 @@ end
 
     end,
 })
+
+Home:CreateSection("Exclusive Textures")
+
+HomeTab:CreateButton({
+    Name = "White Windows",
+    Callback = function()
+
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+
+--------------------------------------------------
+-- WINDOW LOOK
+--------------------------------------------------
+
+-- Pale blue/white glass like the reference
+local GLASS_COLOR = Color3.fromRGB(175, 215, 232)
+
+-- Slight transparency for a 3D glass appearance
+local GLASS_TRANSPARENCY = 0.18
+
+-- Small reflection
+local GLASS_REFLECTANCE = 0.12
+
+
+--------------------------------------------------
+-- CHECK IF SOMETHING IS WINDOW GLASS
+--------------------------------------------------
+
+local function IsWindowGlass(Part)
+
+	if not Part:IsA("BasePart") then
+		return false
+	end
+
+	local Name = Part.Name:lower()
+
+	-- Explicit glass/pane names
+	if Name:find("glass")
+		or Name:find("pane")
+		or Name:find("windowglass")
+		or Name:find("windowpane") then
+
+		return true
+	end
+
+	-- Existing Glass material
+	if Part.Material == Enum.Material.Glass then
+		return true
+	end
+
+	return false
+end
+
+
+--------------------------------------------------
+-- STYLE THE GLASS
+--------------------------------------------------
+
+local function StyleGlass(Part)
+
+	if not IsWindowGlass(Part) then
+		return
+	end
+
+	-- Keep the original 3D geometry
+	Part.Material = Enum.Material.Glass
+
+	-- Pale blue instead of pure white
+	Part.Color = GLASS_COLOR
+
+	-- Slight transparency
+	Part.Transparency = GLASS_TRANSPARENCY
+
+	-- Slight reflection
+	Part.Reflectance = GLASS_REFLECTANCE
+end
+
+
+--------------------------------------------------
+-- REMOVE CURTAINS
+--------------------------------------------------
+
+local function RemoveCurtains(Window)
+
+	for _, Object in ipairs(Window:GetDescendants()) do
+
+		local Name = Object.Name:lower()
+
+		if Name:find("curtain")
+			or Name:find("curtains")
+			or Name:find("drape")
+			or Name:find("drapes") then
+
+			-- Destroy the entire curtain model/folder
+			if Object:IsA("Model") or Object:IsA("BasePart") then
+				Object:Destroy()
+			end
+		end
+	end
+end
+
+
+--------------------------------------------------
+-- STYLE ONE WINDOW
+--------------------------------------------------
+
+local function StyleWindow(Window)
+
+	if not Window then
+		return
+	end
+
+	--------------------------------------------------
+	-- REMOVE CURTAINS
+	--------------------------------------------------
+
+	RemoveCurtains(Window)
+
+
+	--------------------------------------------------
+	-- WINDOW ITSELF
+	--------------------------------------------------
+
+	if Window:IsA("BasePart") then
+		StyleGlass(Window)
+	end
+
+
+	--------------------------------------------------
+	-- PARTS INSIDE WINDOW
+	--------------------------------------------------
+
+	for _, Object in ipairs(Window:GetDescendants()) do
+
+		if Object:IsA("BasePart") then
+			StyleGlass(Object)
+		end
+
+	end
+end
+
+
+--------------------------------------------------
+-- PROCESS ROOM
+--------------------------------------------------
+
+local function ProcessRoom(Room)
+
+	local Assets = Room:FindFirstChild("Assets")
+
+	if not Assets then
+		return
+	end
+
+
+	--------------------------------------------------
+	-- SINGLE WINDOW
+	-- Assets.Window
+	--------------------------------------------------
+
+	local Window = Assets:FindFirstChild("Window")
+
+	if Window then
+		StyleWindow(Window)
+	end
+
+
+	--------------------------------------------------
+	-- MULTIPLE WINDOWS
+	-- Assets.Windows
+	--------------------------------------------------
+
+	local Windows = Assets:FindFirstChild("Windows")
+
+	if Windows then
+
+		for _, WindowObject in ipairs(Windows:GetChildren()) do
+			StyleWindow(WindowObject)
+		end
+
+	end
+end
+
+
+--------------------------------------------------
+-- EXISTING ROOMS
+--------------------------------------------------
+
+for _, Room in ipairs(CurrentRooms:GetChildren()) do
+	ProcessRoom(Room)
+end
+
+
+--------------------------------------------------
+-- NEW ROOMS
+--------------------------------------------------
+
+CurrentRooms.ChildAdded:Connect(function(Room)
+
+	task.wait(0.15)
+
+	ProcessRoom(Room)
+
+end)
+
+    end,
+})
+
+HomeTab:CreateButton({
+    Name = "White to Pink Windows",
+    Callback = function()
+
+
+local TweenService = game:GetService("TweenService")
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+
+--------------------------------------------------
+-- WINDOW COLORS
+--------------------------------------------------
+
+local WHITE_COLOR = Color3.fromRGB(235, 245, 255)
+local PINK_COLOR = Color3.fromRGB(255, 105, 200)
+
+-- How long the color change takes
+local COLOR_CHANGE_TIME = 3
+
+-- Glass settings
+local GLASS_TRANSPARENCY = 0.18
+local GLASS_REFLECTANCE = 0.12
+
+
+--------------------------------------------------
+-- TWEEN SETTINGS
+--------------------------------------------------
+
+local ColorTweenInfo = TweenInfo.new(
+	COLOR_CHANGE_TIME,
+	Enum.EasingStyle.Sine,
+	Enum.EasingDirection.InOut
+)
+
+
+--------------------------------------------------
+-- CHECK IF SOMETHING IS WINDOW GLASS
+--------------------------------------------------
+
+local function IsWindowGlass(Part)
+
+	if not Part:IsA("BasePart") then
+		return false
+	end
+
+	local Name = Part.Name:lower()
+
+	if Name:find("glass")
+		or Name:find("pane")
+		or Name:find("windowglass")
+		or Name:find("windowpane") then
+
+		return true
+	end
+
+	if Part.Material == Enum.Material.Glass then
+		return true
+	end
+
+	return false
+end
+
+
+--------------------------------------------------
+-- STYLE GLASS
+--------------------------------------------------
+
+local function StyleGlass(Part)
+
+	if not IsWindowGlass(Part) then
+		return
+	end
+
+	-- Keep the 3D glass
+	Part.Material = Enum.Material.Glass
+	Part.Transparency = GLASS_TRANSPARENCY
+	Part.Reflectance = GLASS_REFLECTANCE
+
+	-- Start white
+	Part.Color = WHITE_COLOR
+
+	-- Smoothly transition to pink
+	local Tween = TweenService:Create(
+		Part,
+		ColorTweenInfo,
+		{
+			Color = PINK_COLOR
+		}
+	)
+
+	Tween:Play()
+end
+
+
+--------------------------------------------------
+-- REMOVE CURTAINS
+--------------------------------------------------
+
+local function RemoveCurtains(Window)
+
+	for _, Object in ipairs(Window:GetDescendants()) do
+
+		local Name = Object.Name:lower()
+
+		if Name:find("curtain")
+			or Name:find("curtains")
+			or Name:find("drape")
+			or Name:find("drapes") then
+
+			if Object:IsA("Model") or Object:IsA("BasePart") then
+				Object:Destroy()
+			end
+		end
+	end
+end
+
+
+--------------------------------------------------
+-- STYLE ONE WINDOW
+--------------------------------------------------
+
+local function StyleWindow(Window)
+
+	if not Window then
+		return
+	end
+
+	-- Remove curtains
+	RemoveCurtains(Window)
+
+	-- If the window itself is glass
+	if Window:IsA("BasePart") then
+		StyleGlass(Window)
+	end
+
+	-- Style glass inside the window
+	for _, Object in ipairs(Window:GetDescendants()) do
+
+		if Object:IsA("BasePart") then
+			StyleGlass(Object)
+		end
+
+	end
+end
+
+
+--------------------------------------------------
+-- PROCESS ROOM
+--------------------------------------------------
+
+local function ProcessRoom(Room)
+
+	local Assets = Room:FindFirstChild("Assets")
+
+	if not Assets then
+		return
+	end
+
+
+	--------------------------------------------------
+	-- SINGLE WINDOW
+	--------------------------------------------------
+
+	local Window = Assets:FindFirstChild("Window")
+
+	if Window then
+		StyleWindow(Window)
+	end
+
+
+	--------------------------------------------------
+	-- MULTIPLE WINDOWS
+	--------------------------------------------------
+
+	local Windows = Assets:FindFirstChild("Windows")
+
+	if Windows then
+
+		for _, WindowObject in ipairs(Windows:GetChildren()) do
+			StyleWindow(WindowObject)
+		end
+
+	end
+end
+
+
+--------------------------------------------------
+-- EXISTING ROOMS
+--------------------------------------------------
+
+for _, Room in ipairs(CurrentRooms:GetChildren()) do
+	ProcessRoom(Room)
+end
+
+
+--------------------------------------------------
+-- NEW ROOMS
+--------------------------------------------------
+
+CurrentRooms.ChildAdded:Connect(function(Room)
+
+	task.wait(0.15)
+
+	ProcessRoom(Room)
+
+end)
+
+    end,
+})
+
+Home:CreateSection("Halloween MODS")
+
+HomeTab:CreateButton({
+    Name = "Orange to Black Windows",
+    Callback = function()
+
+local TweenService = game:GetService("TweenService")
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+
+--------------------------------------------------
+-- WINDOW LOOK
+--------------------------------------------------
+
+local ORANGE_COLOR = Color3.fromRGB(255, 145, 35)
+local BLACK_COLOR = Color3.fromRGB(5, 5, 5)
+
+local GLASS_TRANSPARENCY = 0.18
+local GLASS_REFLECTANCE = 0.12
+
+-- How long orange -> black takes
+local COLOR_CHANGE_TIME = 4
+
+local ColorTweenInfo = TweenInfo.new(
+	COLOR_CHANGE_TIME,
+	Enum.EasingStyle.Sine,
+	Enum.EasingDirection.InOut
+)
+
+
+--------------------------------------------------
+-- CHECK IF SOMETHING IS WINDOW GLASS
+--------------------------------------------------
+
+local function IsWindowGlass(Part)
+
+	if not Part:IsA("BasePart") then
+		return false
+	end
+
+	local Name = Part.Name:lower()
+
+	if Name:find("glass")
+		or Name:find("pane")
+		or Name:find("windowglass")
+		or Name:find("windowpane") then
+
+		return true
+	end
+
+	if Part.Material == Enum.Material.Glass then
+		return true
+	end
+
+	return false
+end
+
+
+--------------------------------------------------
+-- STYLE GLASS
+--------------------------------------------------
+
+local function StyleGlass(Part)
+
+	if not IsWindowGlass(Part) then
+		return
+	end
+
+	-- Keep the original 3D glass appearance
+	Part.Material = Enum.Material.Glass
+	Part.Transparency = GLASS_TRANSPARENCY
+	Part.Reflectance = GLASS_REFLECTANCE
+
+	-- Start orange
+	Part.Color = ORANGE_COLOR
+
+	-- Smoothly change orange -> black
+	local Tween = TweenService:Create(
+		Part,
+		ColorTweenInfo,
+		{
+			Color = BLACK_COLOR
+		}
+	)
+
+	Tween:Play()
+end
+
+
+--------------------------------------------------
+-- REMOVE CURTAINS
+--------------------------------------------------
+
+local function RemoveCurtains(Window)
+
+	for _, Object in ipairs(Window:GetDescendants()) do
+
+		local Name = Object.Name:lower()
+
+		if Name:find("curtain")
+			or Name:find("curtains")
+			or Name:find("drape")
+			or Name:find("drapes") then
+
+			if Object:IsA("Model") or Object:IsA("BasePart") then
+				Object:Destroy()
+			end
+		end
+	end
+end
+
+
+--------------------------------------------------
+-- STYLE ONE WINDOW
+--------------------------------------------------
+
+local function StyleWindow(Window)
+
+	if not Window then
+		return
+	end
+
+	-- Remove curtains
+	RemoveCurtains(Window)
+
+	-- Window itself
+	if Window:IsA("BasePart") then
+		StyleGlass(Window)
+	end
+
+	-- Glass inside the window
+	for _, Object in ipairs(Window:GetDescendants()) do
+
+		if Object:IsA("BasePart") then
+			StyleGlass(Object)
+		end
+
+	end
+end
+
+
+--------------------------------------------------
+-- PROCESS ROOM
+--------------------------------------------------
+
+local function ProcessRoom(Room)
+
+	local Assets = Room:FindFirstChild("Assets")
+
+	if not Assets then
+		return
+	end
+
+	--------------------------------------------------
+	-- SINGLE WINDOW
+	--------------------------------------------------
+
+	local Window = Assets:FindFirstChild("Window")
+
+	if Window then
+		StyleWindow(Window)
+	end
+
+	--------------------------------------------------
+	-- MULTIPLE WINDOWS
+	--------------------------------------------------
+
+	local Windows = Assets:FindFirstChild("Windows")
+
+	if Windows then
+
+		for _, WindowObject in ipairs(Windows:GetChildren()) do
+			StyleWindow(WindowObject)
+		end
+
+	end
+end
+
+
+--------------------------------------------------
+-- EXISTING ROOMS
+--------------------------------------------------
+
+for _, Room in ipairs(CurrentRooms:GetChildren()) do
+	ProcessRoom(Room)
+end
+
+
+--------------------------------------------------
+-- NEW ROOMS
+--------------------------------------------------
+
+CurrentRooms.ChildAdded:Connect(function(Room)
+
+	task.wait(0.15)
+
+	ProcessRoom(Room)
+
+end)
+
+    end,
+})
+
+HomeTab:CreateButton({
+    Name = "Orange Lights",
+    Callback = function()
+
+local Lighting = game:GetService("Lighting")
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+
+--------------------------------------------------
+-- NO FOG
+--------------------------------------------------
+
+Lighting.FogStart = 0
+Lighting.FogEnd = 100000
+
+-- Remove/disable Atmosphere fog
+for _, object in ipairs(Lighting:GetChildren()) do
+	if object:IsA("Atmosphere") then
+		object.Density = 0
+		object.Haze = 0
+		object.Glare = 0
+	end
+end
+
+
+--------------------------------------------------
+-- ORANGE NEON LIGHTS
+--------------------------------------------------
+
+local ORANGE = Color3.fromRGB(255, 120, 20)
+
+local function MakeOrangeLight(object)
+	if not object:IsA("BasePart") then
+		return
+	end
+
+	-- Make the object itself glow orange
+	object.Material = Enum.Material.Neon
+	object.Color = ORANGE
+
+	-- Don't create duplicate lights
+	if object:FindFirstChild("OrangeNeonLight") then
+		return
+	end
+
+	-- Actual light
+	local Light = Instance.new("PointLight")
+	Light.Name = "OrangeNeonLight"
+	Light.Color = ORANGE
+	Light.Brightness = 2
+	Light.Range = 12
+	Light.Shadows = false
+	Light.Parent = object
+end
+
+
+--------------------------------------------------
+-- APPLY TO ALL CURRENT NEONS
+--------------------------------------------------
+
+for _, object in ipairs(CurrentRooms:GetDescendants()) do
+	if object.Name == "Neon" then
+		MakeOrangeLight(object)
+	end
+end
+
+
+--------------------------------------------------
+-- APPLY TO NEW ROOMS
+--------------------------------------------------
+
+CurrentRooms.DescendantAdded:Connect(function(object)
+	if object.Name == "Neon" then
+		task.wait()
+		MakeOrangeLight(object)
+	end
+end)
+
+    end,
+})
+
+HomeTab:CreateButton({
+    Name = "Test.v1",
+    Callback = function()
+
+print("HALLOWEEN TESTING")
+
+    end,
+})
+
 
 
 local RestoreDoorCollision
