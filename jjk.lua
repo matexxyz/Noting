@@ -1008,6 +1008,256 @@ end
 Home:CreateSection("Exclusive Textures")
 
 HomeTab:CreateButton({
+    Name = "Test.v1",
+    Callback = function()
+
+print("HALLOWEEN TESTING")
+
+    end,
+})
+
+HomeTab:CreateButton({
+    Name = "Jack Room",
+    Callback = function()
+
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+
+--------------------------------------------------
+-- SETTINGS
+--------------------------------------------------
+
+local RED = Color3.fromRGB(255, 25, 20)
+
+-- Fade into the effect
+local FADE_IN_TIME = 1.5
+
+-- How long the red effect stays active
+local HOLD_TIME = 16
+
+-- Fade back to normal
+local FADE_OUT_TIME = 3
+
+
+--------------------------------------------------
+-- COLOR CORRECTION
+--------------------------------------------------
+
+local ColorEffect = Instance.new("ColorCorrectionEffect")
+ColorEffect.Name = "TemporaryRedRoomEffect"
+
+-- Start completely normal
+ColorEffect.TintColor = Color3.fromRGB(255, 255, 255)
+ColorEffect.Brightness = 0
+ColorEffect.Contrast = 0
+ColorEffect.Saturation = 0
+
+ColorEffect.Parent = Lighting
+
+
+--------------------------------------------------
+-- SAVE ORIGINAL LIGHTING
+--------------------------------------------------
+
+local OriginalLighting = {
+	Ambient = Lighting.Ambient,
+	OutdoorAmbient = Lighting.OutdoorAmbient,
+	ColorShift_Top = Lighting.ColorShift_Top,
+	ColorShift_Bottom = Lighting.ColorShift_Bottom,
+	ExposureCompensation = Lighting.ExposureCompensation
+}
+
+
+--------------------------------------------------
+-- SAVE ORIGINAL ROOM LIGHTS
+--------------------------------------------------
+
+local OriginalLights = {}
+
+for _, Object in ipairs(CurrentRooms:GetDescendants()) do
+
+	if Object:IsA("PointLight")
+		or Object:IsA("SpotLight")
+		or Object:IsA("SurfaceLight") then
+
+		OriginalLights[Object] = {
+			Color = Object.Color,
+			Brightness = Object.Brightness
+		}
+
+	end
+end
+
+
+--------------------------------------------------
+-- RED EFFECT
+--------------------------------------------------
+
+local RedLightingGoal = {
+	Ambient = Color3.fromRGB(55, 0, 0),
+	OutdoorAmbient = Color3.fromRGB(35, 0, 0),
+
+	ColorShift_Top = Color3.fromRGB(110, 0, 0),
+	ColorShift_Bottom = Color3.fromRGB(45, 0, 0),
+
+	ExposureCompensation = -0.8
+}
+
+
+--------------------------------------------------
+-- FADE IN COLOR CORRECTION
+--------------------------------------------------
+
+local FadeInEffect = TweenService:Create(
+	ColorEffect,
+	TweenInfo.new(
+		FADE_IN_TIME,
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut
+	),
+	{
+		TintColor = Color3.fromRGB(190, 35, 30),
+		Brightness = -0.12,
+		Contrast = 0.25,
+		Saturation = -0.2
+	}
+)
+
+FadeInEffect:Play()
+
+
+--------------------------------------------------
+-- FADE IN LIGHTING
+--------------------------------------------------
+
+local FadeInLighting = TweenService:Create(
+	Lighting,
+	TweenInfo.new(
+		FADE_IN_TIME,
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut
+	),
+	RedLightingGoal
+)
+
+FadeInLighting:Play()
+
+
+--------------------------------------------------
+-- TURN ROOM LIGHTS RED
+--------------------------------------------------
+
+for Light, Original in pairs(OriginalLights) do
+
+	if Light.Parent then
+
+		TweenService:Create(
+			Light,
+			TweenInfo.new(
+				FADE_IN_TIME,
+				Enum.EasingStyle.Sine,
+				Enum.EasingDirection.InOut
+			),
+			{
+				Color = RED,
+				Brightness = Original.Brightness * 0.85
+			}
+		):Play()
+
+	end
+end
+
+
+--------------------------------------------------
+-- WAIT UNTIL FULL RED EFFECT
+--------------------------------------------------
+
+task.wait(FADE_IN_TIME)
+
+--------------------------------------------------
+-- HOLD FOR 16 SECONDS
+--------------------------------------------------
+
+task.wait(HOLD_TIME)
+
+
+--------------------------------------------------
+-- FADE BACK TO ORIGINAL
+--------------------------------------------------
+
+local FadeOutEffect = TweenService:Create(
+	ColorEffect,
+	TweenInfo.new(
+		FADE_OUT_TIME,
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut
+	),
+	{
+		TintColor = Color3.fromRGB(255, 255, 255),
+		Brightness = 0,
+		Contrast = 0,
+		Saturation = 0
+	}
+)
+
+FadeOutEffect:Play()
+
+
+--------------------------------------------------
+-- RESTORE LIGHTING
+--------------------------------------------------
+
+local RestoreLighting = TweenService:Create(
+	Lighting,
+	TweenInfo.new(
+		FADE_OUT_TIME,
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut
+	),
+	OriginalLighting
+)
+
+RestoreLighting:Play()
+
+
+--------------------------------------------------
+-- RESTORE ROOM LIGHTS
+--------------------------------------------------
+
+for Light, Original in pairs(OriginalLights) do
+
+	if Light.Parent then
+
+		TweenService:Create(
+			Light,
+			TweenInfo.new(
+				FADE_OUT_TIME,
+				Enum.EasingStyle.Sine,
+				Enum.EasingDirection.InOut
+			),
+			{
+				Color = Original.Color,
+				Brightness = Original.Brightness
+			}
+		):Play()
+
+	end
+end
+
+
+--------------------------------------------------
+-- CLEAN UP
+--------------------------------------------------
+
+task.wait(FADE_OUT_TIME)
+
+ColorEffect:Destroy()
+
+    end,
+})
+
+HomeTab:CreateButton({
     Name = "White Windows",
     Callback = function()
 
@@ -1703,6 +1953,236 @@ end)
 })
 
 HomeTab:CreateButton({
+    Name = "Jack Halloween Room",
+    Callback = function()
+
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+
+--------------------------------------------------
+-- SETTINGS
+--------------------------------------------------
+
+local ORANGE = Color3.fromRGB(255, 105, 20)
+
+local FADE_IN_TIME = 1.5
+local HOLD_TIME = 16
+local FADE_OUT_TIME = 3
+
+
+--------------------------------------------------
+-- COLOR CORRECTION
+--------------------------------------------------
+
+local ColorEffect = Instance.new("ColorCorrectionEffect")
+ColorEffect.Name = "OrangeBlackEffect"
+
+-- Start normal
+ColorEffect.TintColor = Color3.fromRGB(255, 255, 255)
+ColorEffect.Brightness = 0
+ColorEffect.Contrast = 0
+ColorEffect.Saturation = 0
+
+ColorEffect.Parent = Lighting
+
+
+--------------------------------------------------
+-- SAVE ORIGINAL LIGHTING
+--------------------------------------------------
+
+local OriginalLighting = {
+	Ambient = Lighting.Ambient,
+	OutdoorAmbient = Lighting.OutdoorAmbient,
+	ColorShift_Top = Lighting.ColorShift_Top,
+	ColorShift_Bottom = Lighting.ColorShift_Bottom,
+	ExposureCompensation = Lighting.ExposureCompensation
+}
+
+
+--------------------------------------------------
+-- SAVE ORIGINAL LIGHTS
+--------------------------------------------------
+
+local OriginalLights = {}
+
+for _, Object in ipairs(CurrentRooms:GetDescendants()) do
+
+	if Object:IsA("PointLight")
+		or Object:IsA("SpotLight")
+		or Object:IsA("SurfaceLight") then
+
+		OriginalLights[Object] = {
+			Color = Object.Color,
+			Brightness = Object.Brightness
+		}
+
+	end
+end
+
+
+--------------------------------------------------
+-- ORANGE / BLACK LIGHTING
+--------------------------------------------------
+
+local OrangeLightingGoal = {
+	-- Very dark environment
+	Ambient = Color3.fromRGB(18, 7, 2),
+	OutdoorAmbient = Color3.fromRGB(10, 4, 1),
+
+	-- Orange color shifts
+	ColorShift_Top = Color3.fromRGB(80, 25, 5),
+	ColorShift_Bottom = Color3.fromRGB(35, 8, 2),
+
+	-- Darker overall exposure
+	ExposureCompensation = -1
+}
+
+
+--------------------------------------------------
+-- FADE INTO ORANGE / BLACK
+--------------------------------------------------
+
+TweenService:Create(
+	ColorEffect,
+	TweenInfo.new(
+		FADE_IN_TIME,
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut
+	),
+	{
+		TintColor = Color3.fromRGB(210, 80, 20),
+		Brightness = -0.15,
+		Contrast = 0.35,
+		Saturation = -0.1
+	}
+):Play()
+
+
+TweenService:Create(
+	Lighting,
+	TweenInfo.new(
+		FADE_IN_TIME,
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut
+	),
+	OrangeLightingGoal
+):Play()
+
+
+--------------------------------------------------
+-- MAKE ROOM LIGHTS ORANGE + DARKER
+--------------------------------------------------
+
+for Light, Original in pairs(OriginalLights) do
+
+	if Light.Parent then
+
+		TweenService:Create(
+			Light,
+			TweenInfo.new(
+				FADE_IN_TIME,
+				Enum.EasingStyle.Sine,
+				Enum.EasingDirection.InOut
+			),
+			{
+				Color = ORANGE,
+
+				-- Keep some light, but make the room darker
+				Brightness = Original.Brightness * 0.65
+			}
+		):Play()
+
+	end
+end
+
+
+--------------------------------------------------
+-- WAIT FOR FULL EFFECT
+--------------------------------------------------
+
+task.wait(FADE_IN_TIME)
+
+
+--------------------------------------------------
+-- HOLD FOR 16 SECONDS
+--------------------------------------------------
+
+task.wait(HOLD_TIME)
+
+
+--------------------------------------------------
+-- FADE BACK TO NORMAL
+--------------------------------------------------
+
+TweenService:Create(
+	ColorEffect,
+	TweenInfo.new(
+		FADE_OUT_TIME,
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut
+	),
+	{
+		TintColor = Color3.fromRGB(255, 255, 255),
+		Brightness = 0,
+		Contrast = 0,
+		Saturation = 0
+	}
+):Play()
+
+
+--------------------------------------------------
+-- RESTORE ORIGINAL LIGHTING
+--------------------------------------------------
+
+TweenService:Create(
+	Lighting,
+	TweenInfo.new(
+		FADE_OUT_TIME,
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut
+	),
+	OriginalLighting
+):Play()
+
+
+--------------------------------------------------
+-- RESTORE ORIGINAL ROOM LIGHTS
+--------------------------------------------------
+
+for Light, Original in pairs(OriginalLights) do
+
+	if Light.Parent then
+
+		TweenService:Create(
+			Light,
+			TweenInfo.new(
+				FADE_OUT_TIME,
+				Enum.EasingStyle.Sine,
+				Enum.EasingDirection.InOut
+			),
+			{
+				Color = Original.Color,
+				Brightness = Original.Brightness
+			}
+		):Play()
+
+	end
+end
+
+
+--------------------------------------------------
+-- CLEAN UP
+--------------------------------------------------
+
+task.wait(FADE_OUT_TIME)
+
+ColorEffect:Destroy()
+
+    end,
+})
+
+HomeTab:CreateButton({
     Name = "Test.v1",
     Callback = function()
 
@@ -1710,8 +2190,6 @@ print("HALLOWEEN TESTING")
 
     end,
 })
-
-
 
 local RestoreDoorCollision
 local VerifyDoorLock
@@ -4097,7 +4575,7 @@ SpawnsTab:CreateButton({
                 Reversed = false
             },
             Rebounding = {
-                Enabled = true,
+                Enabled = false,
                 Type = "Blitz",
                 Min = 2,
                 Max = 4,
@@ -4175,7 +4653,6 @@ SpawnsTab:CreateButton({
 		}):Run()
 	end,
 })
-
 
 local SpawnCleanupNames = {
     ["OG Ambush"]=true,["A-60"]=true,["Depth"]=true,["STUPID HORSE"]=true,["Rebound"]=true,["Ripe"]=true,
