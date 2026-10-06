@@ -188,7 +188,7 @@ local function SetTabletESPMode(active)
     end
 end
 
-Home:CreateSection("Exclusive Items")
+HomeTab:CreateSection("Exclusive Items")
 
 HomeTab:CreateButton({
     Name = "Red Tablet [ CHEST ]",
@@ -852,7 +852,7 @@ Scanner.Parent = Plr.Backpack
     end,
 })
 
-Home:CreateSection("Exclusive Addons")
+HomeTab:CreateSection("Exclusive Addons")
 
 HomeTab:CreateButton({
     Name = "Buff Figure [ SEEK ]",
@@ -1005,7 +1005,7 @@ end
     end,
 })
 
-Home:CreateSection("Exclusive Textures")
+HomeTab:CreateSection("Exclusive Textures")
 
 HomeTab:CreateButton({
     Name = "Test.v1",
@@ -1670,7 +1670,7 @@ end)
     end,
 })
 
-Home:CreateSection("Halloween MODS")
+HomeTab:CreateSection("Halloween MODS")
 
 HomeTab:CreateButton({
     Name = "Orange to Black Windows",
