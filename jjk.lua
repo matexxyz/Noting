@@ -1017,7 +1017,7 @@ print("HALLOWEEN TESTING")
 })
 
 HomeTab:CreateButton({
-    Name = "Jack Room",
+    Name = "Jack Blood Room Remake",
     Callback = function()
 
 local Lighting = game:GetService("Lighting")
@@ -1956,255 +1956,272 @@ HomeTab:CreateButton({
     Name = "Jack Halloween Room",
     Callback = function()
 
-        local Lighting = game:GetService("Lighting")
-        local TweenService = game:GetService("TweenService")
-        local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 
-        --------------------------------------------------
-        -- SETTINGS
-        --------------------------------------------------
+--------------------------------------------------
+-- SETTINGS
+--------------------------------------------------
 
-        local ORANGE = Color3.fromRGB(255, 95, 15)
-        local DARK_ORANGE = Color3.fromRGB(90, 25, 5)
+-- Lighter orange
+local ORANGE = Color3.fromRGB(255, 155, 55)
+local LIGHT_ORANGE = Color3.fromRGB(150, 65, 20)
 
-        local FADE_IN_TIME = 1.5
-        local HOLD_TIME = 16
-        local FADE_OUT_TIME = 3
+local FADE_IN_TIME = 1.5
+local HOLD_TIME = 16
+local FADE_OUT_TIME = 3
 
-        --------------------------------------------------
-        -- REMOVE OLD EFFECT IF ONE EXISTS
-        --------------------------------------------------
+--------------------------------------------------
+-- REMOVE OLD EFFECT IF ONE EXISTS
+--------------------------------------------------
 
-        local OldEffect = Lighting:FindFirstChild("OrangeBlackEffect")
+local OldEffect = Lighting:FindFirstChild("OrangeBlackEffect")
 
-        if OldEffect then
-            OldEffect:Destroy()
-        end
+if OldEffect then
+    OldEffect:Destroy()
+end
 
-        --------------------------------------------------
-        -- SAVE ORIGINAL LIGHTING
-        --------------------------------------------------
+--------------------------------------------------
+-- SAVE ORIGINAL LIGHTING
+--------------------------------------------------
 
-        local OriginalLighting = {
-            Ambient = Lighting.Ambient,
-            OutdoorAmbient = Lighting.OutdoorAmbient,
-            ColorShift_Top = Lighting.ColorShift_Top,
-            ColorShift_Bottom = Lighting.ColorShift_Bottom,
-            ExposureCompensation = Lighting.ExposureCompensation
+local OriginalLighting = {
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
+    ColorShift_Top = Lighting.ColorShift_Top,
+    ColorShift_Bottom = Lighting.ColorShift_Bottom,
+    ExposureCompensation = Lighting.ExposureCompensation
+}
+
+--------------------------------------------------
+-- SAVE ALL EXISTING LIGHTS
+--------------------------------------------------
+
+local OriginalLights = {}
+
+for _, Object in ipairs(CurrentRooms:GetDescendants()) do
+
+    if Object:IsA("PointLight")
+        or Object:IsA("SpotLight")
+        or Object:IsA("SurfaceLight") then
+
+        OriginalLights[Object] = {
+            Color = Object.Color,
+            Brightness = Object.Brightness,
+            Enabled = Object.Enabled
         }
 
-        --------------------------------------------------
-        -- SAVE ALL EXISTING LIGHTS
-        --------------------------------------------------
+    end
+end
 
-        local OriginalLights = {}
+--------------------------------------------------
+-- COLOR CORRECTION
+--------------------------------------------------
 
-        for _, Object in ipairs(CurrentRooms:GetDescendants()) do
+local ColorEffect = Instance.new("ColorCorrectionEffect")
+ColorEffect.Name = "OrangeBlackEffect"
 
-            if Object:IsA("PointLight")
-                or Object:IsA("SpotLight")
-                or Object:IsA("SurfaceLight") then
+ColorEffect.TintColor = Color3.fromRGB(255, 255, 255)
+ColorEffect.Brightness = 0
+ColorEffect.Contrast = 0
+ColorEffect.Saturation = 0
 
-                OriginalLights[Object] = {
-                    Color = Object.Color,
-                    Brightness = Object.Brightness,
-                    Enabled = Object.Enabled
-                }
+ColorEffect.Parent = Lighting
 
-            end
+--------------------------------------------------
+-- FADE INTO LIGHT ORANGE
+--------------------------------------------------
 
-        end
+TweenService:Create(
+    ColorEffect,
+    TweenInfo.new(
+        FADE_IN_TIME,
+        Enum.EasingStyle.Sine,
+        Enum.EasingDirection.InOut
+    ),
+    {
+        -- Lighter orange tint
+        TintColor = Color3.fromRGB(255, 165, 75),
 
-        --------------------------------------------------
-        -- COLOR CORRECTION
-        --------------------------------------------------
+        -- Don't darken the whole screen too much
+        Brightness = -0.05,
 
-        local ColorEffect = Instance.new("ColorCorrectionEffect")
-        ColorEffect.Name = "OrangeBlackEffect"
+        -- Gentle contrast
+        Contrast = 0.2,
 
-        ColorEffect.TintColor = Color3.fromRGB(255, 255, 255)
-        ColorEffect.Brightness = 0
-        ColorEffect.Contrast = 0
-        ColorEffect.Saturation = 0
+        Saturation = 0.1
+    }
+):Play()
 
-        ColorEffect.Parent = Lighting
+--------------------------------------------------
+-- LIGHT ORANGE AMBIENT
+--------------------------------------------------
 
-        --------------------------------------------------
-        -- FADE INTO ORANGE / BLACK
-        --------------------------------------------------
+TweenService:Create(
+    Lighting,
+    TweenInfo.new(
+        FADE_IN_TIME,
+        Enum.EasingStyle.Sine,
+        Enum.EasingDirection.InOut
+    ),
+    {
+        -- Much lighter than the previous version
+        Ambient = Color3.fromRGB(45, 18, 5),
+        OutdoorAmbient = Color3.fromRGB(25, 10, 3),
+
+        ColorShift_Top = Color3.fromRGB(125, 55, 15),
+        ColorShift_Bottom = LIGHT_ORANGE,
+
+        -- Keep the room visible
+        ExposureCompensation = -0.35
+    }
+):Play()
+
+--------------------------------------------------
+-- MAKE ALL CURRENT ROOM LIGHTS LIGHT ORANGE
+--------------------------------------------------
+
+for Light, Original in pairs(OriginalLights) do
+
+    if Light and Light.Parent then
 
         TweenService:Create(
-            ColorEffect,
+            Light,
             TweenInfo.new(
                 FADE_IN_TIME,
                 Enum.EasingStyle.Sine,
                 Enum.EasingDirection.InOut
             ),
             {
-                TintColor = Color3.fromRGB(205, 75, 15),
-                Brightness = -0.2,
-                Contrast = 0.45,
-                Saturation = 0.05
+                Color = ORANGE,
+
+                -- Keep the original brightness
+                Brightness = math.max(
+                    0.1,
+                    Original.Brightness * 1
+                )
             }
         ):Play()
 
-        TweenService:Create(
-            Lighting,
-            TweenInfo.new(
-                FADE_IN_TIME,
-                Enum.EasingStyle.Sine,
-                Enum.EasingDirection.InOut
-            ),
-            {
-                Ambient = Color3.fromRGB(12, 4, 1),
-                OutdoorAmbient = Color3.fromRGB(5, 2, 0),
+    end
+end
 
-                ColorShift_Top = Color3.fromRGB(100, 30, 5),
-                ColorShift_Bottom = DARK_ORANGE,
+--------------------------------------------------
+-- ALSO CATCH NEW LIGHTS DURING THE 16 SECONDS
+--------------------------------------------------
 
-                ExposureCompensation = -1.25
-            }
-        ):Play()
+local NewLightConnection
 
-        --------------------------------------------------
-        -- MAKE ALL CURRENT ROOM LIGHTS ORANGE
-        --------------------------------------------------
+NewLightConnection = CurrentRooms.DescendantAdded:Connect(function(Object)
 
-        for Light, Original in pairs(OriginalLights) do
+    if not (
+        Object:IsA("PointLight")
+        or Object:IsA("SpotLight")
+        or Object:IsA("SurfaceLight")
+    ) then
+        return
+    end
 
-            if Light and Light.Parent then
+    task.wait()
 
-                TweenService:Create(
-                    Light,
-                    TweenInfo.new(
-                        FADE_IN_TIME,
-                        Enum.EasingStyle.Sine,
-                        Enum.EasingDirection.InOut
-                    ),
-                    {
-                        Color = ORANGE,
-                        Brightness = math.max(0.1, Original.Brightness * 0.75)
-                    }
-                ):Play()
+    if Object.Parent then
 
-            end
+        OriginalLights[Object] = {
+            Color = Object.Color,
+            Brightness = Object.Brightness,
+            Enabled = Object.Enabled
+        }
 
-        end
+        Object.Color = ORANGE
+        Object.Brightness = Object.Brightness
+    end
 
-        --------------------------------------------------
-        -- ALSO CATCH NEW LIGHTS DURING THE 16 SECONDS
-        --------------------------------------------------
+end)
 
-        local NewLightConnection
+--------------------------------------------------
+-- HOLD
+--------------------------------------------------
 
-        NewLightConnection = CurrentRooms.DescendantAdded:Connect(function(Object)
+task.wait(FADE_IN_TIME)
+task.wait(HOLD_TIME)
 
-            if not (
-                Object:IsA("PointLight")
-                or Object:IsA("SpotLight")
-                or Object:IsA("SurfaceLight")
-            ) then
-                return
-            end
+--------------------------------------------------
+-- STOP WATCHING NEW LIGHTS
+--------------------------------------------------
 
-            task.wait()
+if NewLightConnection then
+    NewLightConnection:Disconnect()
+    NewLightConnection = nil
+end
 
-            if Object.Parent then
+--------------------------------------------------
+-- FADE BACK TO NORMAL
+--------------------------------------------------
 
-                OriginalLights[Object] = {
-                    Color = Object.Color,
-                    Brightness = Object.Brightness,
-                    Enabled = Object.Enabled
-                }
+TweenService:Create(
+    ColorEffect,
+    TweenInfo.new(
+        FADE_OUT_TIME,
+        Enum.EasingStyle.Sine,
+        Enum.EasingDirection.InOut
+    ),
+    {
+        TintColor = Color3.fromRGB(255, 255, 255),
+        Brightness = 0,
+        Contrast = 0,
+        Saturation = 0
+    }
+):Play()
 
-                Object.Color = ORANGE
-                Object.Brightness = Object.Brightness * 0.75
+--------------------------------------------------
+-- RESTORE ORIGINAL LIGHTING
+--------------------------------------------------
 
-            end
+TweenService:Create(
+    Lighting,
+    TweenInfo.new(
+        FADE_OUT_TIME,
+        Enum.EasingStyle.Sine,
+        Enum.EasingDirection.InOut
+    ),
+    OriginalLighting
+):Play()
 
-        end)
+--------------------------------------------------
+-- RESTORE ROOM LIGHTS
+--------------------------------------------------
 
-        --------------------------------------------------
-        -- HOLD
-        --------------------------------------------------
+for Light, Original in pairs(OriginalLights) do
 
-        task.wait(FADE_IN_TIME)
-        task.wait(HOLD_TIME)
-
-        --------------------------------------------------
-        -- STOP WATCHING NEW LIGHTS
-        --------------------------------------------------
-
-        if NewLightConnection then
-            NewLightConnection:Disconnect()
-            NewLightConnection = nil
-        end
-
-        --------------------------------------------------
-        -- FADE BACK TO NORMAL
-        --------------------------------------------------
+    if Light and Light.Parent then
 
         TweenService:Create(
-            ColorEffect,
-            TweenInfo.new(
-                FADE_OUT_TIME,
-                Enum.EasingStyle.Sine,
-                Enum.EasingDirection.InOut
-            ),
-            {
-                TintColor = Color3.fromRGB(255, 255, 255),
-                Brightness = 0,
-                Contrast = 0,
-                Saturation = 0
-            }
-        ):Play()
-
-        TweenService:Create(
-            Lighting,
+            Light,
             TweenInfo.new(
                 FADE_OUT_TIME,
                 Enum.EasingStyle.Sine,
                 Enum.EasingDirection.InOut
             ),
-            OriginalLighting
+            {
+                Color = Original.Color,
+                Brightness = Original.Brightness
+            }
         ):Play()
 
-        --------------------------------------------------
-        -- RESTORE ROOM LIGHTS
-        --------------------------------------------------
+        Light.Enabled = Original.Enabled
+    end
+end
 
-        for Light, Original in pairs(OriginalLights) do
+--------------------------------------------------
+-- CLEANUP
+--------------------------------------------------
 
-            if Light and Light.Parent then
+task.wait(FADE_OUT_TIME)
 
-                TweenService:Create(
-                    Light,
-                    TweenInfo.new(
-                        FADE_OUT_TIME,
-                        Enum.EasingStyle.Sine,
-                        Enum.EasingDirection.InOut
-                    ),
-                    {
-                        Color = Original.Color,
-                        Brightness = Original.Brightness
-                    }
-                ):Play()
-
-                Light.Enabled = Original.Enabled
-
-            end
-
-        end
-
-        --------------------------------------------------
-        -- CLEANUP
-        --------------------------------------------------
-
-        task.wait(FADE_OUT_TIME)
-
-        if ColorEffect and ColorEffect.Parent then
-            ColorEffect:Destroy()
-        end
+if ColorEffect and ColorEffect.Parent then
+    ColorEffect:Destroy()
+end
 
     end,
 })
@@ -5412,6 +5429,15 @@ PlushysTab:CreateButton({
 
  PlushysTab:CreateButton({
     Name = "Feathered Kiwi Plushy",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/PFERptU5", true))()
+    end,
+ })
+
+HomeTab:CreateSection("Items")
+
+ PlushysTab:CreateButton({
+    Name = "Feathered",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/PFERptU5", true))()
     end,
